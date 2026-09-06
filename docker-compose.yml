@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: quizservice-postgres
+    environment:
+      POSTGRES_DB: quizservice_db
+      POSTGRES_USER: quizuser
+      POSTGRES_PASSWORD: quizpass
+    ports:
+      - "5434:5432"
+    volumes:
+      - quizservice_pgdata:/var/lib/postgresql
+
+volumes:
+  quizservice_pgdata:
