@@ -9,6 +9,7 @@ import com.pranjal.quizservice.repository.QuizRepository;
 import com.pranjal.quizservice.service.QuizService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,12 +17,14 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class QuizServiceImpl implements QuizService {
 
     private final QuizRepository quizRepository;
     private final QuizMapper quizMapper;
 
     @Override
+    @Transactional
     public QuizResponse create(QuizRequest request) {
         Quiz quiz = new Quiz();
         quiz.setTitle(request.getTitle());
@@ -44,6 +47,7 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
+    @Transactional
     public QuizResponse update(UUID id, QuizRequest request) {
         Quiz quiz = findQuizOrThrow(id);
         quiz.setTitle(request.getTitle());
@@ -54,6 +58,7 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
+    @Transactional
     public void delete(UUID id) {
         Quiz quiz = findQuizOrThrow(id);
         quizRepository.delete(quiz);

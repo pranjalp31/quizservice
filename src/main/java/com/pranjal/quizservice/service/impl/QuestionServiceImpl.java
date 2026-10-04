@@ -11,6 +11,7 @@ import com.pranjal.quizservice.repository.QuizRepository;
 import com.pranjal.quizservice.service.QuestionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class QuestionServiceImpl implements QuestionService {
 
     private final QuestionRepository questionRepository;
@@ -25,6 +27,7 @@ public class QuestionServiceImpl implements QuestionService {
     private final QuestionMapper questionMapper;
 
     @Override
+    @Transactional
     public QuestionResponse create(UUID quizId, QuestionRequest request) {
         Quiz quiz = quizRepository.findById(quizId)
                 .orElseThrow(() -> new ResourceNotFoundException("Quiz not found with id: " + quizId));
@@ -53,6 +56,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
+    @Transactional
     public QuestionResponse update(UUID id, QuestionRequest request) {
         Question question = findQuestionOrThrow(id);
         question.setText(request.getText());
@@ -63,6 +67,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
+    @Transactional
     public void delete(UUID id) {
         Question question = findQuestionOrThrow(id);
         questionRepository.delete(question);
