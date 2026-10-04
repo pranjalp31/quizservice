@@ -9,12 +9,12 @@ import com.pranjal.quizservice.repository.QuizRepository;
 import com.pranjal.quizservice.service.QuizService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -46,11 +46,10 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
-    public List<QuizResponse> getAll() {
-        log.debug("Fetching all quizzes");
-        return quizRepository.findAll().stream()
-                .map(quizMapper::toResponse)
-                .collect(Collectors.toList());
+    public Page<QuizResponse> getAll(Pageable pageable) {
+        log.debug("Fetching quizzes, page {}", pageable.getPageNumber());
+        return quizRepository.findAll(pageable)
+                .map(quizMapper::toResponse);
     }
 
     @Override

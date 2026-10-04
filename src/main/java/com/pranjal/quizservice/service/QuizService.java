@@ -2,8 +2,9 @@ package com.pranjal.quizservice.service;
 
 import com.pranjal.quizservice.dto.request.QuizRequest;
 import com.pranjal.quizservice.dto.response.QuizResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface QuizService {
@@ -12,7 +13,7 @@ public interface QuizService {
 
     QuizResponse getById(UUID id);
 
-    List<QuizResponse> getAll();
+    Page<QuizResponse> getAll(Pageable pageable);
 
     QuizResponse update(UUID id, QuizRequest request);
 

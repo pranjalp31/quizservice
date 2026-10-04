@@ -5,6 +5,9 @@ import com.pranjal.quizservice.dto.response.QuestionResponse;
 import com.pranjal.quizservice.service.QuestionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -32,8 +34,10 @@ public class QuestionController {
     }
 
     @GetMapping("/api/quizzes/{quizId}/questions")
-    public ResponseEntity<List<QuestionResponse>> getAllByQuiz(@PathVariable UUID quizId) {
-        return ResponseEntity.ok(questionService.getAllByQuizId(quizId));
+    public ResponseEntity<Page<QuestionResponse>> getAllByQuiz(
+            @PathVariable UUID quizId,
+            @PageableDefault(size = 10, sort = "orderIndex") Pageable pageable) {
+        return ResponseEntity.ok(questionService.getAllByQuizId(quizId, pageable));
     }
 
     @GetMapping("/api/questions/{id}")
