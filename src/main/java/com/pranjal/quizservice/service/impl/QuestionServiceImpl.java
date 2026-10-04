@@ -5,6 +5,7 @@ import com.pranjal.quizservice.dto.response.QuestionResponse;
 import com.pranjal.quizservice.entity.Question;
 import com.pranjal.quizservice.entity.Quiz;
 import com.pranjal.quizservice.exception.ResourceNotFoundException;
+import com.pranjal.quizservice.mapper.QuestionMapper;
 import com.pranjal.quizservice.repository.QuestionRepository;
 import com.pranjal.quizservice.repository.QuizRepository;
 import com.pranjal.quizservice.service.QuestionService;
@@ -21,6 +22,7 @@ public class QuestionServiceImpl implements QuestionService {
 
     private final QuestionRepository questionRepository;
     private final QuizRepository quizRepository;
+    private final QuestionMapper questionMapper;
 
     @Override
     public QuestionResponse create(UUID quizId, QuestionRequest request) {
@@ -34,19 +36,19 @@ public class QuestionServiceImpl implements QuestionService {
         question.setOrderIndex(request.getOrderIndex());
         question.setPoints(request.getPoints());
 
-        return toResponse(questionRepository.save(question));
+        return questionMapper.toResponse(questionRepository.save(question));
     }
 
     @Override
     public QuestionResponse getById(UUID id) {
-        return toResponse(findQuestionOrThrow(id));
+        return questionMapper.toResponse(findQuestionOrThrow(id));
     }
 
     @Override
     public List<QuestionResponse> getAllByQuizId(UUID quizId) {
         return questionRepository.findAll().stream()
                 .filter(q -> q.getQuiz().getId().equals(quizId))
-                .map(this::toResponse)
+                .map(questionMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
@@ -57,7 +59,7 @@ public class QuestionServiceImpl implements QuestionService {
         question.setType(request.getType());
         question.setOrderIndex(request.getOrderIndex());
         question.setPoints(request.getPoints());
-        return toResponse(questionRepository.save(question));
+        return questionMapper.toResponse(questionRepository.save(question));
     }
 
     @Override
@@ -69,14 +71,5 @@ public class QuestionServiceImpl implements QuestionService {
     private Question findQuestionOrThrow(UUID id) {
         return questionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + id));
-    }
-
-    private QuestionResponse toResponse(Question question) {
-        return new QuestionResponse(
-                question.getId(),
-                question.getText(),
-                question.getType(),
-                question.getOrderIndex(),
-                question.getPoints());
     }
 }

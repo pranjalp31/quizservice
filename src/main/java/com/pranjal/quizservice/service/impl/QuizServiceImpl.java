@@ -1,10 +1,10 @@
 package com.pranjal.quizservice.service.impl;
 
 import com.pranjal.quizservice.dto.request.QuizRequest;
-import com.pranjal.quizservice.dto.response.QuestionResponse;
 import com.pranjal.quizservice.dto.response.QuizResponse;
 import com.pranjal.quizservice.entity.Quiz;
 import com.pranjal.quizservice.exception.ResourceNotFoundException;
+import com.pranjal.quizservice.mapper.QuizMapper;
 import com.pranjal.quizservice.repository.QuizRepository;
 import com.pranjal.quizservice.service.QuizService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 public class QuizServiceImpl implements QuizService {
 
     private final QuizRepository quizRepository;
+    private final QuizMapper quizMapper;
 
     @Override
     public QuizResponse create(QuizRequest request) {
@@ -27,18 +28,18 @@ public class QuizServiceImpl implements QuizService {
         quiz.setDescription(request.getDescription());
         quiz.setTimeLimitMinutes(request.getTimeLimitMinutes());
         quiz.setPublished(request.isPublished());
-        return toResponse(quizRepository.save(quiz));
+        return quizMapper.toResponse(quizRepository.save(quiz));
     }
 
     @Override
     public QuizResponse getById(UUID id) {
-        return toResponse(findQuizOrThrow(id));
+        return quizMapper.toResponse(findQuizOrThrow(id));
     }
 
     @Override
     public List<QuizResponse> getAll() {
         return quizRepository.findAll().stream()
-                .map(this::toResponse)
+                .map(quizMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
@@ -49,7 +50,7 @@ public class QuizServiceImpl implements QuizService {
         quiz.setDescription(request.getDescription());
         quiz.setTimeLimitMinutes(request.getTimeLimitMinutes());
         quiz.setPublished(request.isPublished());
-        return toResponse(quizRepository.save(quiz));
+        return quizMapper.toResponse(quizRepository.save(quiz));
     }
 
     @Override
@@ -61,22 +62,5 @@ public class QuizServiceImpl implements QuizService {
     private Quiz findQuizOrThrow(UUID id) {
         return quizRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Quiz not found with id: " + id));
-    }
-
-    private QuizResponse toResponse(Quiz quiz) {
-        List<QuestionResponse> questions = quiz.getQuestions().stream()
-                .map(q -> new QuestionResponse(
-                        q.getId(), q.getText(), q.getType(), q.getOrderIndex(), q.getPoints()))
-                .collect(Collectors.toList());
-
-        return new QuizResponse(
-                quiz.getId(),
-                quiz.getTitle(),
-                quiz.getDescription(),
-                quiz.getTimeLimitMinutes(),
-                quiz.isPublished(),
-                questions,
-                quiz.getCreatedAt(),
-                quiz.getUpdatedAt());
     }
 }
