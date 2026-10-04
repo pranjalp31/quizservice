@@ -10,6 +10,7 @@ import com.pranjal.quizservice.repository.QuestionRepository;
 import com.pranjal.quizservice.repository.QuizRepository;
 import com.pranjal.quizservice.service.QuestionService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -29,8 +31,12 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     @Transactional
     public QuestionResponse create(UUID quizId, QuestionRequest request) {
+        log.info("Adding question to quiz {}", quizId);
         Quiz quiz = quizRepository.findById(quizId)
-                .orElseThrow(() -> new ResourceNotFoundException("Quiz not found with id: " + quizId));
+                .orElseThrow(() -> {
+                    log.warn("Quiz not found with id {}", quizId);
+                    return new ResourceNotFoundException("Quiz not found with id: " + quizId);
+                });
 
         Question question = new Question();
         question.setQuiz(quiz);
@@ -39,16 +45,20 @@ public class QuestionServiceImpl implements QuestionService {
         question.setOrderIndex(request.getOrderIndex());
         question.setPoints(request.getPoints());
 
-        return questionMapper.toResponse(questionRepository.save(question));
+        Question saved = questionRepository.save(question);
+        log.info("Created question with id {} for quiz {}", saved.getId(), quizId);
+        return questionMapper.toResponse(saved);
     }
 
     @Override
     public QuestionResponse getById(UUID id) {
+        log.debug("Fetching question with id {}", id);
         return questionMapper.toResponse(findQuestionOrThrow(id));
     }
 
     @Override
     public List<QuestionResponse> getAllByQuizId(UUID quizId) {
+        log.debug("Fetching questions for quiz {}", quizId);
         return questionRepository.findAll().stream()
                 .filter(q -> q.getQuiz().getId().equals(quizId))
                 .map(questionMapper::toResponse)
@@ -58,6 +68,7 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     @Transactional
     public QuestionResponse update(UUID id, QuestionRequest request) {
+        log.info("Updating question with id {}", id);
         Question question = findQuestionOrThrow(id);
         question.setText(request.getText());
         question.setType(request.getType());
@@ -69,12 +80,16 @@ public class QuestionServiceImpl implements QuestionService {
     @Override
     @Transactional
     public void delete(UUID id) {
+        log.info("Deleting question with id {}", id);
         Question question = findQuestionOrThrow(id);
         questionRepository.delete(question);
     }
 
     private Question findQuestionOrThrow(UUID id) {
         return questionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + id));
+                .orElseThrow(() -> {
+                    log.warn("Question not found with id {}", id);
+                    return new ResourceNotFoundException("Question not found with id: " + id);
+                });
     }
 }
